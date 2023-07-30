@@ -9,4 +9,4 @@ cover/
 .coverage.*
 .cache
 
-database.ini
+database.example.ini
