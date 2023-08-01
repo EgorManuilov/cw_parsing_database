@@ -7,7 +7,7 @@ class DBManager:
         self.db_params = db_params
         self.filename = filename
 
-    def self_queries_sql(self):
+    def get_queries_sql(self):
         """ Берет данные из SQL-файла и создает словарь """
         with open(self.filename, 'r', encoding='utf-8') as sql_file:
             clear_queries = " ".join(line.strip() for line in sql_file if not line.startswith("--"))
@@ -19,34 +19,52 @@ class DBManager:
         queries_dict = {comments[i].strip(): queries[i] for i in range(len(comments))}
         return queries_dict
 
-    def get_companies_and_vacancies_count(self, rows=None):
+    def get_companies_and_vacancies_count(self):
         """ Получает список всех компаний и количество вакансий у каждой компании """
-        with psycopg2.connect(db_name=self.db_name, **self.db.params) as conn:
+
+        with psycopg2.connect(dbname=self.db_name, **self.db_params) as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     self.get_queries_sql()['-- Получает список всех компаний и количество вакансий у каждой компании']
                 )
+                rows = cur.fetchall()
                 for row in rows:
                     print(row)
         conn.close()
 
-    def get_all_vacancies(self, rows=None):
+    def get_all_vacancies(self):
         """
-               Получает список всех вакансий с указанием названия компании,
-               названия вакансии и зарплаты и ссылки на вакансию
-               """
+        Получает список всех вакансий с указанием названия компании,
+        названия вакансии и зарплаты и ссылки на вакансию
+        """
+
         with psycopg2.connect(dbname=self.db_name, **self.db_params) as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     self.get_queries_sql()['-- Получает список всех вакансий с указанием названия компании, '
                                            'названия вакансии и зарплаты и ссылки на вакансию']
                 )
+                rows = cur.fetchall()
+                for row in rows:
+                    print(row)
+        conn.close()
+
+    def get_avg_salary(self):
+        """  Получает среднюю зарплату по вакансиям """
+
+        with psycopg2.connect(dbname=self.db_name, **self.db_params) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    self.get_queries_sql()['-- Получает среднюю зарплату по вакансиям']
+                )
+                rows = cur.fetchall()
                 for row in rows:
                     print(row)
         conn.close()
 
     def get_vacancies_with_higher_salary(self):
         """ Получает список всех вакансий, у которых зарплата выше средней по всем вакансиям """
+
         with psycopg2.connect(dbname=self.db_name, **self.db_params) as conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -59,14 +77,16 @@ class DBManager:
         conn.close()
 
     def get_vacancies_with_keyword(self, key_word: str):
-        """ Получает список всех вакансий, в названии которых содержатся переданные в метод слова """
+        """ Получает список всех вакансий, в названии которых содержатся переданные в метод слова, например “python” """
 
         with psycopg2.connect(dbname=self.db_name, **self.db_params) as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     self.get_queries_sql()['-- Получает список всех вакансий,'
-                                           ' в названии которых содержатся переданные в метод слова'], [f'%{key_word}%']
-                )
+                                           ' в названии которых содержатся переданные в метод слова,'
+                                           ' например “python”'], [f'%{key_word}%']
+                    )
                 rows = cur.fetchall()
                 for row in rows:
                     print(row)
+        conn.close()

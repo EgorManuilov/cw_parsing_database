@@ -10,7 +10,7 @@ def get_hh_employers(employer_ids: list[str]) -> list[dict[str, Any]]:
     employers = []
     for employer_id in employer_ids:
 
-        response = requests.get(f'https://api.hh.ru/employers/{employer_id}')
+        response = requests.get(f'https://api.hh.ru/employers/{employer_id}', timeout=5)
         if response.status_code != 200:
             raise Exception(f"Ошибка получения данных {response.status_code}")
         employer_data = response.json()
